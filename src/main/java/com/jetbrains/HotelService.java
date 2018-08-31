@@ -8,11 +8,12 @@ public class HotelService {
 
 	private static HotelService instance;
 	private static final Logger LOGGER = Logger.getLogger(HotelService.class.getName());
-
-	private final HashMap<Long, Hotel> hotels = new HashMap<>();
+	private CategoryService categoryService;
+	public static HashMap<Long, Hotel> hotels = new HashMap<>();
 	private long nextId = 0;
 
 	private HotelService() {
+		categoryService = CategoryService.getInstance();
 	}
 
 	public static HotelService getInstance() {
@@ -86,13 +87,7 @@ public class HotelService {
                 Logger.getLogger(HotelService.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        Collections.sort(arrayList, new Comparator<Hotel>() {
-
-            @Override
-            public int compare(Hotel o1, Hotel o2) {
-                return (int) (o2.getId() - o1.getId());
-            }
-        });
+        Collections.sort(arrayList, (o1, o2) -> (int) (o2.getId() - o1.getId()));
         return arrayList;
     }
 
@@ -150,6 +145,7 @@ public class HotelService {
 					"Phetmeuangsam Hotel;2;https://www.booking.com/hotel/la/phetmisay.en-gb.html;Ban Phanhxai, Xumnuea, Xam Nua, 01000 Xam Nua, Laos" };
 
 			Random r = new Random(0);
+			Set<Category> categorySet = CategoryService.getInstance().findAll();
 			for (String hotel : hotelData) {
 				String[] split = hotel.split(";");
 				Hotel h = new Hotel();
@@ -157,12 +153,13 @@ public class HotelService {
 				h.setRating(split[1]);
 				h.setUrl(split[2]);
 				h.setAddress(split[3]);
-				h.setCategory(HotelCategory.values()[r.nextInt(HotelCategory.values().length)]);
+				h.setCategory((Category)categorySet.toArray()[r.nextInt(categorySet.size())]);
 				long daysOld = 0 - r.nextInt(365 * 30);
 				h.setOperatesFrom(daysOld);
 				save(h);
 			}
 		}
+
 	}
 
 }

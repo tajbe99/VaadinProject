@@ -8,7 +8,7 @@ public class Hotel implements Serializable, Cloneable {
 	private String address = "";
 	private int rating;
 	private Long operatesFrom;
-	private HotelCategory category;
+	private Category category;
 
 	private String url;
 	private String description;
@@ -63,10 +63,10 @@ public class Hotel implements Serializable, Cloneable {
 	public void setOperatesFrom(Long operatesFrom) {
 		this.operatesFrom = operatesFrom;
 	}
-	public HotelCategory getCategory() {
+	public Category getCategory() {
 		return category;
 	}
-	public void setCategory(HotelCategory category) {
+	public void setCategory(Category category) {
 		this.category = category;
 	}
 	public String getUrl() {
@@ -75,7 +75,7 @@ public class Hotel implements Serializable, Cloneable {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	public Hotel(Long id, String name, String address, int rating, Long operatesFrom, HotelCategory category, String url, String description) {
+	public Hotel(Long id, String name, String address, int rating, Long operatesFrom, Category category, String url, String description) {
 		super();
 		this.id = id;
 		this.name = name;

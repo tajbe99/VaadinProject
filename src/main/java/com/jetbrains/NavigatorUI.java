@@ -14,7 +14,6 @@ public class NavigatorUI extends UI implements View {
     final NativeButton menuHotelButton = new NativeButton();
     protected VerticalLayout menuLayout;
     protected VerticalLayout contentPanel = new VerticalLayout();
-    final HotelUI hotelView = new HotelUI();
     Navigator navigator;
 
     private MenuBar.Command openMenu(final String viewId) {
@@ -45,15 +44,20 @@ public class NavigatorUI extends UI implements View {
         navigator.addView("Category", new CategoryUI());
         VerticalLayout divs = new VerticalLayout();
 
-        MenuBar menu = new MenuBar();
-        menu.setAutoOpen(true);
-        MenuBar.MenuItem hotelItem  = menu.addItem("Hotel", openMenu("Hotel"));
-        MenuBar.MenuItem categoryItem = menu.addItem("Category", openMenu("Category"));
+        MenuBar menu = initMenuBar();
         content.setMargin(false);
         divs.addComponents(menu, content);
         layout.addComponent(divs);
         layout.setMargin(false);
 
+    }
+
+    private MenuBar initMenuBar() {
+        MenuBar menu = new MenuBar();
+        menu.setAutoOpen(true);
+        MenuBar.MenuItem hotelItem  = menu.addItem("Hotel", openMenu("Hotel"));
+        MenuBar.MenuItem categoryItem = menu.addItem("Category", openMenu("Category"));
+        return menu;
     }
 
     @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)

@@ -2,6 +2,7 @@ package com.jetbrains;
 import javax.servlet.annotation.WebServlet;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.data.Binder;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -38,43 +39,61 @@ public class HotelUI extends VerticalLayout implements View {
     final Button addHotel = new Button("Add Hotel");
     final Button delHotel = new Button("Delete Hotel");
     final Button editHotel = new Button("Edit Hotel");
-    final CategoryUI categoryUI = new CategoryUI();
+    final CategoryService categoryService = CategoryService.getInstance();
     private HotelEditForm form = new HotelEditForm(this);
+    private Binder<Hotel> binder = hotelGrid.getEditor().getBinder();
 
     public HotelUI(){
-
     }
+
     @Override
     public void enter(ViewChangeListener.ViewChangeEvent event) {
-        editHotel.setEnabled(false);
         form.setVisible(false);
         initGrid();
-        filterName.addValueChangeListener(e -> updateFilterByName());
-        filterName.setPlaceholder("Input name...");
-        filterAddress.setPlaceholder("Input address...");
-        filterName.setValueChangeMode(ValueChangeMode.LAZY);
-        filterAddress.addValueChangeListener(e -> updateFilterByAddress());
-        panelContent.addComponents(filterName, filterAddress, addHotel,delHotel,editHotel);
-        delHotel.setEnabled(false);
-        delHotel.addClickListener(e -> {
-            Set<Hotel> delCandidate = hotelGrid.getSelectedItems();
-            hotelService.delete(delCandidate);
-            delHotel.setEnabled(false);
-            updateList();
-            form.setVisible(false);
-            editHotel.setEnabled(false);
-        });
-        editHotel.addClickListener(e -> {
-            form.setHotel(hotelGrid.asSingleSelect().getValue());
-        });
-        panel.setContent(panelContent);
-        panel.setWidthUndefined();
+        initBtn();
+        initFilters();
+        initPanel();
         gridEditformContent.addComponents(hotelGrid,form);
         contentLayout.addComponents(panel, gridEditformContent);
         gridEditformContent.setMargin(false);
         this.setMargin(false);
         addComponent(contentLayout);
-        addHotel.addClickListener(e -> form.setHotel(new Hotel()));
+        updateList();
+    }
+
+    private void initPanel() {
+        panelContent.addComponents(filterName, filterAddress, addHotel,delHotel,editHotel);
+        panel.setContent(panelContent);
+        panel.setWidthUndefined();
+    }
+
+    private void initFilters() {
+        filterName.addValueChangeListener(e -> updateFilterByName());
+        filterName.setPlaceholder("Input name...");
+        filterAddress.setPlaceholder("Input address...");
+        filterName.setValueChangeMode(ValueChangeMode.LAZY);
+        filterAddress.addValueChangeListener(e -> updateFilterByAddress());
+    }
+
+    private void initBtn() {
+        editHotel.setEnabled(false);
+        delHotel.setEnabled(false);
+        delHotel.addClickListener(e -> {
+            Set<Hotel> delCandidate = hotelGrid.getSelectedItems();
+            hotelService.delete(delCandidate);
+            delHotel.setEnabled(false);
+            form.setVisible(false);
+            editHotel.setEnabled(false);
+            updateList();
+        });
+        editHotel.addClickListener(e -> {
+            form.setHotel(hotelGrid.asMultiSelect().getSelectedItems());
+            updateList();
+        });
+        addHotel.addClickListener(e -> {
+            form.setHotel(new Hotel());
+            updateList();
+        });
     }
 
     void updateFilterByName() {
@@ -89,8 +108,15 @@ public class HotelUI extends VerticalLayout implements View {
 
     private void initGrid() {
         hotelGrid.setWidth("950");
-        hotelGrid.setItems(hotelService.findAll());
-        hotelGrid.setColumnOrder("name", "address", "rating", "category");
+        updateList();
+        hotelGrid.setColumnOrder("name", "address", "rating","category");
+        hotelGrid.getColumn("category")
+                .setEditorBinding(binder
+                        .forField(new TextField())
+                        .withNullRepresentation("No category")
+                        .bind(Hotel::getName, Hotel::setName)
+                );
+        binder.bindInstanceFields(this);
         hotelGrid.removeColumn("url");
         hotelGrid.asSingleSelect().addValueChangeListener(e -> {
             if (e.getValue() != null){
@@ -118,9 +144,16 @@ public class HotelUI extends VerticalLayout implements View {
             }
         });
     }
+
     void updateList() {
-        List<Hotel> hotelList = hotelService.findAll("") ;
+        List<Hotel> hotelList = hotelService.getInstance().findAll() ;
+//        for (int i = 0; i < hotelList.size(); i++){
+//            if (!CategoryService.getInstance().findOneCategory(hotelList.get(i).getCategory().getName())){
+//                hotelList.get(i).setCategory(new Category("No category"));
+//            }
+//        }
         hotelGrid.setItems(hotelList);
     }
+
 
 }

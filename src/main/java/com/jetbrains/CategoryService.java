@@ -15,12 +15,13 @@ public class CategoryService {
     private final HashMap<Long, Category> categoryMap = new HashMap<>();
     private long nextId = 0;
 
-    private CategoryService() { }
+    private CategoryService() {
+    }
 
     public static CategoryService getInstance() {
         if (instance == null) {
             instance = new CategoryService();
-            String[] initialCategories = { "Hotel", "Hostel", "GuestHouse", "Appartments" };
+            String[] initialCategories = {"Hotel", "Hostel", "GuestHouse", "Appartments"};
             for (String s : initialCategories) {
                 Category ht = new Category(s);
                 instance.save(ht);
@@ -38,7 +39,7 @@ public class CategoryService {
             category.setId(nextId++);
         }
         try {
-            category = (Category)category.clone();
+            category = (Category) category.clone();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -47,8 +48,20 @@ public class CategoryService {
 
     public synchronized void delete(Set<Category> category) {
 
-        for (Category delCategory: category){
+        for (Category delCategory : category) {
             categoryMap.remove(delCategory.getId());
+        }
+        List<Hotel> hotelList = HotelService.getInstance().findAll();
+        HashMap<Long, Hotel> newHotelsMap = new HashMap<>();
+        for (Category oldCategory : category) {
+            for (int i = 0; i < hotelList.size(); i++) {
+
+                if (hotelList.get(i).getCategory().getName().equals(oldCategory.getName())) {
+                    hotelList.get(i).setCategory(new Category("No category"));
+                }
+                newHotelsMap.put(Long.valueOf(i), hotelList.get(i));
+            }
+            HotelService.hotels = newHotelsMap;
         }
     }
 
@@ -62,4 +75,14 @@ public class CategoryService {
         }
         return result;
     }
+
+    public synchronized boolean findOneCategory(String name) {
+        for (Category category: categoryMap.values()){
+            if (name.equals(category.getName())){
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

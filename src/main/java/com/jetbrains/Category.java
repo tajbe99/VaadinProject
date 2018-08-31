@@ -16,7 +16,6 @@ public class Category implements Serializable, Cloneable{
     protected Category clone() throws CloneNotSupportedException {
         return (Category) super.clone();
     }
-
     @Override
     public boolean equals(Object o) {
         return super.equals(o);
